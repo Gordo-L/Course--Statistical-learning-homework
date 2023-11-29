@@ -1,0 +1,70 @@
+---
+title: "《统计学习》慕课"
+author: "XXX"
+documentclass: ctexart
+output:
+  rticles::ctex:
+    latex_engine: xelatex
+    includes:
+      in_header: header.tex
+      before_body: doc_prefix.tex
+      after_body: doc_suffix.tex
+    toc: false
+    toc_depth: 2
+    fig_caption: yes
+    number_sections: yes
+    keep_tex: true
+    df_print: default
+    citation_package: natbib
+classoption: "hyperref,UTF8"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE,
+                      warning = FALSE, fig.showtext = TRUE)
+```
+
+# 1
+
+利用R中DAAG包中自带的anesthetic数据集建立Logistic回归模型。其中，取麻醉剂浓度(conc)为自变量x，患者是否保持静止（nomove）为因变量y，y取1时表示患者静止，y取0时表示患者有移动。利用summary函数对回归结果进行分析。需要上传程序代码。
+
+```{r}
+library(DAAG)
+head(anesthetic)
+cdplot(factor(nomove)~conc,data=anesthetic,main='条件密度图',ylab='病人移动',xlab='麻醉剂量')
+```
+
+从图中可见，随着麻醉剂量加大，手术病人倾向于静止。
+下面利用logistic回归进行建模。
+
+```{r}
+anes1=glm(nomove~conc,family=binomial(link='logit'),data=anesthetic)
+summary(anes1)
+```
+
+得到intercept和conc的系数为-6.47和5.57，由此可见麻醉剂量超过1.16(6.47/5.57)时，病人静止概率超过50%。
+
+---
+
+# 2
+
+使用R中的iris数据集，利用Kmeans算法对其进行聚类，选择聚类簇数k=3，并对聚类结果进行简单的分析和说明。需要上传程序代码。（备注：可以参考11.6节课程内容）
+
+```{r}
+library(factoextra)
+newiris<-iris
+newiris$Species<-NULL#对训练数据去掉分类标记，如果不去掉因为有这类无法聚类的文本，会报错
+iris1<-kmeans(newiris,3)#分类模型训练
+fitted(iris1)#查看具体分类情况
+table(iris$Species,iris1$cluster)#查看分类概括
+```
+
+```{r}
+#聚类结果可视化
+plot(newiris[c("Sepal.Length", "Sepal.Width")], col = iris1$cluster, pch = as.integer(iris$Species)) #不同的颜色代表不同的聚类结果，不同的形状代表训练数据集的原始真实分类（即分错了16个）。
+points(iris1$centers[,c("Sepal.Length", "Sepal.Width")], col = 1:3, pch = 8, cex=2)#标记聚类中心
+```
+
+从输出结果看，setosa花成功聚为1类（图中左上角的红o）；而versicolor花和virginica有16个分错交叉，但主体部分区分的还比较明显。
+
+---
